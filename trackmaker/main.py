@@ -15,14 +15,12 @@ COLOR_WHITE = (255, 255, 255)
 COLOR_BLACK = (0, 0, 0)
 COLOR_RED = (255, 0, 0)
 
+POINT_RADIUS = 12
+
 camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
-race_tab = TrackMakerTab(1200, 800)
-race_tab.add_pre_processing(race_tab.canvas.fill, [COLOR_BLACK])
+race_tab = TrackMakerTab(camera.screen, 12000, 8000, default_point_radius=POINT_RADIUS)
 
 camera.append(race_tab)
-
-
-POINT_RADIUS = 31
 get_new_point_color = lambda : (rd.randint(51, 204), rd.randint(51, 204), rd.randint(51, 204))
 get_new_line_color = lambda : COLOR_WHITE
 
@@ -41,9 +39,8 @@ while running:
             camera.actions(event)
 
 
-        
-
     camera.update()
     clock.tick(60)
+    print(clock.get_fps())
     
 pg.quit()

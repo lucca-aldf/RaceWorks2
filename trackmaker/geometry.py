@@ -21,6 +21,10 @@ class  Point(Element):
         self.img.set_colorkey((0, 0, 0))
         gfxdraw.filled_circle(self.img, self.display_radius, self.display_radius, self.display_radius, self.color)
 
+
+    def get_color(self):
+        return self.color
+
     @property
     def x(self):
         return self.position[0]
@@ -86,7 +90,6 @@ class LineBetweenPoints(Element):
         super().__init__()
         self.points = [this_point, the_other_point]
         self.color = color
-
     @property
     def img(self):
         width = abs(self.points[0].x - self.points[1].x)
@@ -114,3 +117,45 @@ class LineBetweenPoints(Element):
             abs(self.points[0].x - self.points[1].x),
             abs(self.points[0].y - self.points[1].y))
 
+
+class Spline(Element):
+
+    def __init__(self, points:Tuple[Point, Point, Point, Point], color:Tuple[int, int, int]=(0,0,0)) -> None:
+        super().__init__()
+        self.points = points
+        self.start_point = points[0]
+        self.end_point = points[3]
+        self.color = color
+
+        self.lines = (LineBetweenPoints(self.points[0], self.points[1], (255,255,255)),
+                      LineBetweenPoints(self.points[2], self.points[3], (255,255,255)))
+
+    @property
+    def img(self):
+        max_x = max(point.x for point in self.points)
+        min_x = min(point.x for point in self.points)
+        max_y = max(point.y for point in self.points)
+        min_y = min(point.y for point in self.points)
+
+        width = max_x - min_x
+        height = max_y - min_y
+        img = pg.Surface((width + 2, height + 2), pg.SRCALPHA)
+
+
+        gfxdraw.bezier(img, 
+                    [(point.x - min_x, point.y - min_y) for point in self.points],
+                     32,
+                     self.color)
+        return img
+    
+    @property
+    def rect(self):
+        max_x = max(point.x for point in self.points)
+        min_x = min(point.x for point in self.points)
+        max_y = max(point.y for point in self.points)
+        min_y = min(point.y for point in self.points)
+        return pg.Rect(
+            min_x,
+            min_y,
+            max_x - min_x,
+            max_y - min_y)

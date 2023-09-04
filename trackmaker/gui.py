@@ -60,8 +60,8 @@ class Camera():
             return None
         
         tab = self.current_tab
-
-        self.screen.blit(tab.render(), self.position)
-
-        pg.display.update()
+        
+        render, rect = tab.render()
+        self.screen.blit(render, rect)
+        pg.display.update(rect)
         
