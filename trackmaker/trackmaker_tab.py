@@ -32,22 +32,9 @@ class TrackMakerTab(Tab):
         self.splines = pg.sprite.Group()
 
         self.point_radius = default_point_radius
-        first_color, second_color = generate_random_color(lower_bounds=(51,51,51)), generate_random_color(lower_bounds=(51,51,51))
-
-        first_spline = Spline(
-            (Point((50,50), self.point_radius, first_color),
-            Point((50,150), self.point_radius, first_color),
-            Point((150,150), self.point_radius, second_color),
-            Point((350,150), self.point_radius, second_color)),
-            generate_random_color(lower_bounds=(51,51,51)))
-        
-        self.points.add(first_spline.points)
-        self.lines.add(first_spline.lines)
-        self.splines.add(first_spline)
-
-                
     
-        self.to_connect_point: Point = list(self.splines)[-1].end_point
+        self.to_connect_point: Point | None = None
+        self.start_loop_point: Point | None = None
         self.dragged_point: Point | None = None
 
     def actions(self, event):
@@ -64,26 +51,60 @@ class TrackMakerTab(Tab):
         elif event.type == pg.MOUSEBUTTONDOWN and event.button == 3:# and pg.key.get_pressed()[pg.K_LSHIFT]:
             this_point = get_point_under_mouse(self.points, event.pos)
 
-            if not this_point:
+            if not self.to_connect_point:
                 mouse_pos = pg.mouse.get_pos()
-                first_half_color = self.to_connect_point.get_color()
-                second_half_color = generate_random_color(lower_bounds=(51,51,51))
+                first_color = generate_random_color(lower_bounds=(51,51,51))
+                second_color = generate_random_color(lower_bounds=(51,51,51))
+                
+                this_spline = Spline(
+                    (Point((mouse_pos[0], mouse_pos[1]), self.point_radius, first_color),
+                    Point((mouse_pos[0] + 50, mouse_pos[1]), self.point_radius, first_color),
+                    Point((mouse_pos[0] + 50, mouse_pos[1] + 50), self.point_radius, second_color),
+                    Point((mouse_pos[0] + 100, mouse_pos[1] + 50), self.point_radius, second_color)),
+                    generate_random_color(lower_bounds=(51,51,51)))
+                
+                self.points.add(this_spline.points)
+                self.lines.add(this_spline.lines)
+                self.splines.add(this_spline)
+
+                self.start_loop_point = this_spline.start_point
+                self.to_connect_point = this_spline.end_point
+
+            elif not this_point:
+                mouse_pos = pg.mouse.get_pos()
+                first_color = self.to_connect_point.get_color()
+                second_color = generate_random_color(lower_bounds=(51,51,51))
 
                 this_spline = Spline((self.to_connect_point,
-                                      Point((mouse_pos[0] + 40, mouse_pos[1]), self.point_radius, first_half_color),
-                                      Point((mouse_pos[0] + 70, mouse_pos[1]), self.point_radius, second_half_color),
-                                      Point((mouse_pos[0] + 100, mouse_pos[1]), self.point_radius, second_half_color)),
+                                      Point((mouse_pos[0] + 50, mouse_pos[1]), self.point_radius, first_color),
+                                      Point((mouse_pos[0] + 50, mouse_pos[1] + 50), self.point_radius, second_color),
+                                      Point((mouse_pos[0] + 100, mouse_pos[1] + 50), self.point_radius, second_color)),
                                     generate_random_color(lower_bounds=(51,51,51)))
                                       
                 self.points.add(this_spline.points[1:])
-                
                 self.lines.add(this_spline.lines)
-
                 self.splines.add(this_spline)
 
-                
-                
                 self.to_connect_point = this_spline.end_point
+            
+            elif this_point is self.start_loop_point:
+                mouse_pos = pg.mouse.get_pos()
+                first_color = self.to_connect_point.get_color()
+                second_color = self.start_loop_point.get_color()
+
+                this_spline = Spline((self.to_connect_point,
+                                      Point((mouse_pos[0] + 50, mouse_pos[1]), self.point_radius, first_color),
+                                      Point((mouse_pos[0] + 50, mouse_pos[1] + 50), self.point_radius, second_color),
+                                      self.start_loop_point),
+                                    generate_random_color(lower_bounds=(51,51,51)))
+                                      
+                self.points.add(this_spline.points[1:-1])
+                self.lines.add(this_spline.lines)
+                self.splines.add(this_spline)
+
+                self.start_loop_point = None
+                self.to_connect_point = None
+                
     
     def render(self):
         self.canvas.fill((0, 0, 0))
