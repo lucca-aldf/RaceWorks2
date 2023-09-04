@@ -39,7 +39,10 @@ class Tab:
 
     def append(self, sprite:pg.sprite.Sprite):
         self.group.add(sprite)
-    
+
+    def get_mouse_pos(self):
+        mouse_pos = pg.mouse.get_pos()
+        return mouse_pos
 
     def add_pre_processing(self, method, parameters):
         self.pre_processing.append((method, parameters))

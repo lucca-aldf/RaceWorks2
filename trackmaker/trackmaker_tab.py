@@ -7,14 +7,14 @@ from random import randint
 def add_tuples(*tuples):
     size = len(tuples[0])
     result = [0 for _ in range(size)]
-    
+
     for tuple_ in tuples:
         for i in range(size):
             result[i] += tuple_[i]
     
-    return tuple_(result)
+    return tuple(result)
 
-def subtrat_tuples(first_tuple, second_tuple, size=2):
+def subtract_tuples(first_tuple, second_tuple, size=2):
     size = len(first_tuple)
     result = [0 for _ in range(size)]
 
@@ -24,6 +24,9 @@ def subtrat_tuples(first_tuple, second_tuple, size=2):
         result[i] -= second_tuple[i]
     
     return tuple(result)
+
+def multiply_tuple(tuple_, scale):
+    return (tuple_[0] * scale, tuple_[1] * scale)
 
 
 def get_point_under_mouse(points, mouse_position:Tuple[int, int]):
@@ -61,7 +64,7 @@ class TrackMakerTab(Tab):
 
     def actions(self, event):
         if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
-            self.dragged_point = get_point_under_mouse(self.points, event.pos)
+            self.dragged_point = get_point_under_mouse(self.points, add_tuples(event.pos, self.position))
             
         elif event.type == pg.MOUSEBUTTONUP and event.button == 1:
             self.dragged_point = None
@@ -72,9 +75,9 @@ class TrackMakerTab(Tab):
 
         elif event.type == pg.MOUSEBUTTONDOWN and event.button == 3:# and pg.key.get_pressed()[pg.K_LSHIFT]:
             this_point = get_point_under_mouse(self.points, event.pos)
+            mouse_pos = add_tuples(event.pos, self.position)
 
             if not self.to_connect_point:
-                mouse_pos = pg.mouse.get_pos()
                 first_color = generate_random_color(lower_bounds=(51,51,51))
                 second_color = generate_random_color(lower_bounds=(51,51,51))
                 
@@ -93,7 +96,6 @@ class TrackMakerTab(Tab):
                 self.to_connect_point = this_spline.end_point
 
             elif not this_point:
-                mouse_pos = pg.mouse.get_pos()
                 first_color = self.to_connect_point.get_color()
                 second_color = generate_random_color(lower_bounds=(51,51,51))
 
@@ -110,7 +112,6 @@ class TrackMakerTab(Tab):
                 self.to_connect_point = this_spline.end_point
             
             elif this_point is self.start_loop_point:
-                mouse_pos = pg.mouse.get_pos()
                 first_color = self.to_connect_point.get_color()
                 second_color = self.start_loop_point.get_color()
 
@@ -126,7 +127,25 @@ class TrackMakerTab(Tab):
 
                 self.start_loop_point = None
                 self.to_connect_point = None
-                
+        
+        elif event.type == pg.MOUSEMOTION and pg.mouse.get_pressed()[1]:
+            self.x += event.rel[0]
+            self.y += event.rel[1]
+            
+        elif event.type == pg.KEYDOWN and pg.key.get_pressed()[pg.K_w]:
+            self.y -= 100
+
+        elif event.type == pg.KEYDOWN and pg.key.get_pressed()[pg.K_s]:
+            self.y += 100
+        
+        elif event.type == pg.KEYDOWN and pg.key.get_pressed()[pg.K_a]:
+            self.x -= 100
+
+        elif event.type == pg.KEYDOWN and pg.key.get_pressed()[pg.K_d]:
+            self.x += 100
+        
+        self.x = max(0, min(self.width, self.x))
+        self.y = max(0, min(self.height, self.y))
     
     def render(self):
         canvas =  pg.Surface(self.screen.get_size())
@@ -135,9 +154,9 @@ class TrackMakerTab(Tab):
         for method, parameters in self.pre_processing:
             method(*parameters)
 
-        canvas.blits([(sprite.img, subtrat_tuples(sprite.rect.topleft, self.position)) for sprite in self.points])
-        canvas.blits([(sprite.img, subtrat_tuples(sprite.rect.topleft, self.position)) for sprite in self.lines])
-        canvas.blits([(sprite.img, subtrat_tuples(sprite.rect.topleft, self.position)) for sprite in self.splines])
+        canvas.blits([(sprite.img, subtract_tuples(sprite.rect.topleft, self.position)) for sprite in self.points])
+        canvas.blits([(sprite.img, subtract_tuples(sprite.rect.topleft, self.position)) for sprite in self.lines])
+        canvas.blits([(sprite.img, subtract_tuples(sprite.rect.topleft, self.position)) for sprite in self.splines])
 
         for method, parameters in self.post_processing:
             method(*parameters)

@@ -4,6 +4,18 @@ from tab import *
 from trackmaker_tab import *
 
 
+def subtract_tuples(first_tuple, second_tuple, size=2):
+    size = len(first_tuple)
+    result = [0 for _ in range(size)]
+
+    for i in range(size):
+        result[i] += first_tuple[i]
+    for i in range(size):
+        result[i] -= second_tuple[i]
+    
+    return tuple(result)
+
+
 class Camera():
     
     def __init__(self, width:int, height:int, position:Tuple[float, float] = (0, 0), zoom:float = 1.0) -> None:
@@ -62,6 +74,6 @@ class Camera():
         tab = self.current_tab
         
         render, rect = tab.render()
-        self.screen.blit(render, rect)
-        pg.display.update(rect)
+        self.screen.blit(render, (0,0))
+        pg.display.update()
         
