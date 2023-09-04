@@ -4,6 +4,28 @@ from geometry import *
 import pygame as pg
 from random import randint
 
+def add_tuples(*tuples):
+    size = len(tuples[0])
+    result = [0 for _ in range(size)]
+    
+    for tuple_ in tuples:
+        for i in range(size):
+            result[i] += tuple_[i]
+    
+    return tuple_(result)
+
+def subtrat_tuples(first_tuple, second_tuple, size=2):
+    size = len(first_tuple)
+    result = [0 for _ in range(size)]
+
+    for i in range(size):
+        result[i] += first_tuple[i]
+    for i in range(size):
+        result[i] -= second_tuple[i]
+    
+    return tuple(result)
+
+
 def get_point_under_mouse(points, mouse_position:Tuple[int, int]):
     for point in points:
         if point.rect.collidepoint(mouse_position):
@@ -107,16 +129,17 @@ class TrackMakerTab(Tab):
                 
     
     def render(self):
-        self.canvas.fill((0, 0, 0))
+        canvas =  pg.Surface(self.screen.get_size())
+        canvas.fill((0, 0, 0))
 
         for method, parameters in self.pre_processing:
             method(*parameters)
 
-        self.canvas.blits([(sprite.img, sprite.rect) for sprite in self.points])
-        self.canvas.blits([(sprite.img, sprite.rect) for sprite in self.lines])
-        self.canvas.blits([(sprite.img, sprite.rect) for sprite in self.splines])
+        canvas.blits([(sprite.img, subtrat_tuples(sprite.rect.topleft, self.position)) for sprite in self.points])
+        canvas.blits([(sprite.img, subtrat_tuples(sprite.rect.topleft, self.position)) for sprite in self.lines])
+        canvas.blits([(sprite.img, subtrat_tuples(sprite.rect.topleft, self.position)) for sprite in self.splines])
 
         for method, parameters in self.post_processing:
             method(*parameters)
 
-        return self.canvas, self.rect
+        return canvas, self.rect
