@@ -13,7 +13,7 @@ class Tab:
         self.position = starting_position
         self.zoom = starting_zoom
         
-        self.canvas = pg.Surface(screen.get_size())
+        #self.canvas = pg.Surface(screen.get_size())
         self.pre_processing:List[Tuple[function, list]] = list()
         self.post_processing:List[Tuple[function, list]] = list()
 
