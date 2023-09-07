@@ -55,6 +55,11 @@ class TrackMakerTab(Tab):
         self.points = pg.sprite.Group()
         self.lines = pg.sprite.Group()
         self.splines = pg.sprite.Group()
+        self.loops = pg.sprite.Group()
+
+        self.points_visibility = True
+        self.lines_visibility = True
+        self.splines_visibility = True
 
         self.point_radius = default_point_radius
     
@@ -143,6 +148,15 @@ class TrackMakerTab(Tab):
 
         elif event.type == pg.KEYDOWN and pg.key.get_pressed()[pg.K_d]:
             self.x += 100
+
+        elif event.type == pg.KEYDOWN and pg.key.get_pressed()[pg.K_F1]:
+            self.points_visibility = not self.points_visibility
+
+        elif event.type == pg.KEYDOWN and pg.key.get_pressed()[pg.K_F2]:
+            self.lines_visibility = not self.lines_visibility
+        
+        elif event.type == pg.KEYDOWN and pg.key.get_pressed()[pg.K_F3]:
+            self.splines_visibility = not self.splines_visibility
         
         self.x = max(0, min(self.width, self.x))
         self.y = max(0, min(self.height, self.y))
@@ -154,11 +168,17 @@ class TrackMakerTab(Tab):
         for method, parameters in self.pre_processing:
             method(*parameters)
 
-        canvas.blits([(sprite.img, subtract_tuples(sprite.rect.topleft, self.position)) for sprite in self.points])
-        canvas.blits([(sprite.img, subtract_tuples(sprite.rect.topleft, self.position)) for sprite in self.lines])
-        canvas.blits([(sprite.img, subtract_tuples(sprite.rect.topleft, self.position)) for sprite in self.splines])
+        if self.points_visibility:
+            canvas.blits([(sprite.img, subtract_tuples(sprite.rect.topleft, self.position)) for sprite in self.points])
+        if self.lines_visibility:
+            canvas.blits([(sprite.img, subtract_tuples(sprite.rect.topleft, self.position)) for sprite in self.lines])
+        if self.splines_visibility:
+            canvas.blits([(sprite.img, subtract_tuples(sprite.rect.topleft, self.position)) for sprite in self.splines])
 
         for method, parameters in self.post_processing:
             method(*parameters)
 
         return canvas, self.rect
+    
+    """def save_splines(self):
+        for spline in self.splines.sprites():"""
